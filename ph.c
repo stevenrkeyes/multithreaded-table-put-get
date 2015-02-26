@@ -57,15 +57,19 @@ void put(int key, int value)
   int b = key % NBUCKET;
   int i;
   // Loop up through the entries in the bucket to find an unused one:
+  assert(pthread_mutex_lock(&lock) == 0);
   for (i = 0; i < NENTRY; i++) {
+    //assert(pthread_mutex_lock(&lock) == 0); // acquire lock
     if (!table[b][i].inuse) {
       table[b][i].key = key;
       table[b][i].value = value;
       table[b][i].inuse = 1;
-      return;
+      break;
     }
+    //assert(pthread_mutex_unlock(&lock) == 0); //release lock
   }
-  assert(0);
+  assert(pthread_mutex_unlock(&lock) == 0);
+  //assert(0);
 }
 
 // Lookup key in hash table.  The lock serializes the lookups.
